@@ -1,5 +1,5 @@
 import { Controller, Get } from '@nestjs/common';
-import { EventService } from './event.service';
+import { EventService } from '../services/event.service';
 
 @Controller()
 export class EventController {

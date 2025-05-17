@@ -1,9 +1,17 @@
 import { Module } from '@nestjs/common';
-import { GatewayController } from './gateway.controller';
-import { GatewayService } from './gateway.service';
+import { GatewayController } from './controllers/gateway.controller';
+import { GatewayService } from './services/gateway.service';
+import { ConfigModule } from '@nestjs/config';
+import { HttpModule } from '@nestjs/axios';
 
 @Module({
-  imports: [],
+  imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: '../../.env'
+    }),
+    HttpModule
+  ],
   controllers: [GatewayController],
   providers: [GatewayService],
 })
