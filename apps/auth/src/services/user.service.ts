@@ -1,18 +1,21 @@
-import { ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { User } from '../schemas/user.schema';
 import * as bcrypt from 'bcrypt';
-import { CreateUserDto } from '../dto/create-user.dto';
+import { UpdateUserRoleDto, UserDto } from '../dto/alter-user.dto';
+import { LoginDto } from '../dto/login.dto';
+import { AuthService } from './auth.service';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectModel(User.name) private userModel: Model<User>,
+    private readonly authService: AuthService
   ) {}
 
-  async create(userData: CreateUserDto) {
-    await this.isDuplicate(userData.userId, userData.username);
+  async create(userData: UserDto) {
+    await this.checkDuplicate(userData.userId, userData.username);
 
     const hashed = await bcrypt.hash(userData.password, 10);
     const user = new this.userModel({
@@ -23,6 +26,30 @@ export class UserService {
     return user.save();
   }
 
+  async login(userData: LoginDto) {
+    const user = await this.validateUser(userData.userId, userData.password);
+    return this.authService.authenticate(user);
+  }
+
+  async update(userId: string, dto: UserDto) {
+    this.checkDuplicate(undefined, dto.username);
+    
+    const updateData: UserDto = {
+      ...dto,
+      password: await bcrypt.hash(dto.password, 10)
+    };
+
+    return this.updateUserById(userId, updateData);
+  }
+  
+  async updateRole(userId: string, dto: UpdateUserRoleDto) {
+    return this.updateUserById(userId, dto);
+  }
+
+  async deleteUser(userId: string) {
+    return this.userModel.findOneAndDelete({ userId });
+  }
+
   async validateUser(userId: string, password: string) {
     const user = await this.findByUserId(userId);
     if (!user) throw new UnauthorizedException('Invalid userId or password');
@@ -31,20 +58,34 @@ export class UserService {
     return user;
   }
 
-  private async isDuplicate(userId: string, username: string) {
-    if (await this.findByUserId(userId)) {
+  async checkDuplicate(userId?: string, username?: string) {
+    if (userId && await this.findByUserId(userId)) {
       throw new ConflictException('User ID already exists');
     }
-    if (await this.findByUsername(username)) {
+    if (username && await this.findByUsername(username)) {
       throw new ConflictException('Username already exists');
     }
   }
 
-  private async findByUserId(userId: string) {
-    return this.userModel.findOne({ userId });
+  async findByUserId(userId: string) {
+    const user = await this.userModel.findOne({ userId });
+    if(!user) throw new NotFoundException('User not found');
+    return user;
   }
 
-  private async findByUsername(username: string) {
-    return this.userModel.findOne({ username });
+  async findByUsername(username: string) {
+    const user = await this.userModel.findOne({ username });
+    if(!user) throw new NotFoundException('User not found');
+    return user;
+  }
+
+  async updateUserById(userId: string, userData: Partial<User>) {
+    const updated = await this.userModel.findOneAndUpdate(
+      { userId },
+      { $set: userData },
+      { new: true },
+    );
+    if(!updated) throw new NotFoundException('User not found');
+    return updated;
   }
 }

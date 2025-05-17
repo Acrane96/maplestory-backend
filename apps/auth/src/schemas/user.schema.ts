@@ -1,6 +1,7 @@
+import { UserRole } from '@app/interfaces';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
-import { UserRole } from '@app/interfaces/user/user.interface';
+
 
 @Schema()
 export class User extends Document {

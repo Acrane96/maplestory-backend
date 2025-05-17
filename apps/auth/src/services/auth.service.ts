@@ -1,17 +1,14 @@
 import { Injectable } from '@nestjs/common';
-import { UserService } from './user.service';
 import { JwtService } from '@nestjs/jwt';
-import { LoginDto } from '../dto/login.dto';
+import { User } from '../schemas/user.schema';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly userService: UserService,
     private readonly jwtService: JwtService,
   ) { }
   
-    async login(userData: LoginDto) {
-    const user = await this.userService.validateUser(userData.userId, userData.password);
+  authenticate(user: User) {
     const payload = {
       sub: user._id,
       userId: user.userId,
@@ -26,9 +23,5 @@ export class AuthService {
         role: user.role,
       },
     };
-  }
-
-  getHello(): string {
-    return 'Hello World!';
   }
 }
