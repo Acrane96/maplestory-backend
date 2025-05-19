@@ -68,15 +68,11 @@ export class UserService {
   }
 
   async findByUserId(userId: string) {
-    const user = await this.userModel.findOne({ userId });
-    if(!user) throw new NotFoundException('User not found');
-    return user;
+    return this.userModel.findOne({ userId });
   }
 
   async findByUsername(username: string) {
-    const user = await this.userModel.findOne({ username });
-    if(!user) throw new NotFoundException('User not found');
-    return user;
+    return this.userModel.findOne({ username });
   }
 
   async updateUserById(userId: string, userData: Partial<User>) {

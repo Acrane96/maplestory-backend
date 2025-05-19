@@ -1,18 +1,22 @@
-import { Module } from '@nestjs/common';
-import { GatewayController } from './controllers/gateway.controller';
-import { GatewayService } from './services/gateway.service';
+import { Module, MiddlewareConsumer } from '@nestjs/common';
+import { APP_GUARD, Reflector } from '@nestjs/core';
+import { ProxyMiddleware } from './proxy.middleware';
+import { CommonModule, JwtAuthGuard, RolesGuard } from '@app/common';
 import { ConfigModule } from '@nestjs/config';
-import { HttpModule } from '@nestjs/axios';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({
-      isGlobal: true,
-      envFilePath: '../../.env'
-    }),
-    HttpModule
+    ConfigModule.forRoot({ isGlobal: true }),
+    CommonModule,
   ],
-  controllers: [GatewayController],
-  providers: [GatewayService],
+  providers: [
+    { provide: APP_GUARD, useClass: JwtAuthGuard },
+    { provide: APP_GUARD, useClass: RolesGuard },
+    Reflector,
+  ],
 })
-export class GatewayModule {}
+export class GatewayModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(ProxyMiddleware).forRoutes('*');
+  }
+}

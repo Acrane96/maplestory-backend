@@ -1,7 +1,7 @@
 import { Injectable, CanActivate, ExecutionContext, ForbiddenException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { ROLES_KEY } from './roles.decorator';
-import { UserRole } from '@app/interfaces';
+import { UserRole, UserRoleEnum } from '@app/interfaces';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
@@ -17,7 +17,7 @@ export class RolesGuard implements CanActivate {
     }
     const { user } = context.switchToHttp().getRequest();
 
-    if (user && (user.role === UserRole.ADMIN || requiredRoles.includes(user.role))) {
+    if (user && (user.role === UserRoleEnum.ADMIN || requiredRoles.includes(user.role))) {
       return true;
     }
     throw new ForbiddenException('Forbidden resource');

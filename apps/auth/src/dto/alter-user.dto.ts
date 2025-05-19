@@ -1,4 +1,4 @@
-import { UserRole } from '@app/interfaces';
+import { UserRole, UserRoleEnum } from '@app/interfaces';
 import { IsEnum, IsString, MinLength } from 'class-validator';
 
 export class UserDto {
@@ -15,7 +15,7 @@ export class UserDto {
 }
 
 export class UpdateUserRoleDto {
-  @IsEnum(UserRole)
+  @IsEnum(UserRoleEnum)
   role: UserRole;
 
 }
