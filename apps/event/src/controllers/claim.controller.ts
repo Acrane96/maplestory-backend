@@ -9,7 +9,7 @@ export class ClaimController {
   constructor(private readonly claimService: ClaimService) {}
 
   @Post()
-  @Roles(UserRoleEnum.ADMIN, UserRoleEnum.USER, UserRoleEnum.OPERATOR)
+  @Roles(UserRoleEnum.ADMIN, UserRoleEnum.USER)
   createClaim(@Body() dto: CreateClaimDto) {
     return this.claimService.createClaim(dto);
   }

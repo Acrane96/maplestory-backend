@@ -31,11 +31,13 @@ export class AuthController {
   }
 
   @Patch(':userId')
+  @Roles(UserRoleEnum.ADMIN, UserRoleEnum.USER)
   async updateUser(@Param('userId') userId: string, @Body() dto: UserDto) {
     return this.userService.update(userId, dto);
   }
   
   @Delete(':userId')
+  @Roles(UserRoleEnum.ADMIN, UserRoleEnum.USER)
   async deleteUser(@Param('userId') userId: string) {
     return this.userService.deleteUser(userId);
   }
