@@ -15,7 +15,6 @@ export class AuthController {
   @Post('register')
   @Public()
   async register(@Body() dto: UserDto) {
-    console.log("register");
     return this.userService.create(dto);
   }
 
